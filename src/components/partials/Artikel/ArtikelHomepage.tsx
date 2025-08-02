@@ -1,19 +1,45 @@
 'use client';
 
-import { JSX } from 'react';
-import Image from 'next/image';
+import { fetchArticles } from '@/hooks/fetchArtikel';
 import Link from 'next/link';
-import { artikels } from '@/constants/artikel';
+import { JSX } from 'react';
 
 export default function ArtikelHomepage(): JSX.Element {
-  const previewArticles = artikels.slice(0, 3);
+  const { articles, loading, error } = fetchArticles();
 
-  const createSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/ /g, '-')
-      .replace(/[^\w-]+/g, '');
-  };
+  const previewArticles = articles?.slice(0, 3) || [];
+
+  if(loading) {
+    return (
+      <div className="flex flex-col gap-y-12 animate-pulse">
+        <div className="flex flex-col xl:flex-row gap-y-7 xl:gap-x-14 items-center justify-center">
+          <div className="w-full h-[25rem] xl:min-w-[50%] bg-gray-200 rounded-lg" />
+          <div className="flex flex-col justify-between gap-y-6 w-full">
+            <div className="flex flex-col gap-y-3">
+              <div className="h-4 w-1/4 bg-gray-300 rounded" />
+              <div className="h-8 w-3/4 bg-gray-300 rounded" />
+              <div className="h-24 w-full bg-gray-200 rounded" />
+            </div>
+            <div className="h-12 w-40 bg-gray-300 rounded-full" />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-y-4">
+              <div className="w-full h-[15rem] bg-gray-200 rounded-lg" />
+              <div className="flex flex-col gap-y-2">
+                <div className="h-4 w-1/3 bg-gray-300 rounded" />
+                <div className="h-6 w-2/3 bg-gray-300 rounded" />
+                <div className="h-20 w-full bg-gray-200 rounded" />
+                <div className="h-12 w-40 bg-gray-300 rounded-full mt-2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <section className="flex flex-col px-4 py-[50px] lg:py-[80px] gap-y-16 z-30 container">
@@ -26,7 +52,7 @@ export default function ArtikelHomepage(): JSX.Element {
         {/* Artikel Utama */}
         {previewArticles[0] && (
           <div className="flex flex-col xl:flex-row gap-y-7 xl:gap-x-14 items-center justify-center">
-            <Image src={previewArticles[0].images[0]} alt={previewArticles[0].title} width={800} height={600} className="w-full h-[25rem] xl:min-w-[50%] rounded-lg object-cover object-center" />
+            <img src={previewArticles[0].imageUrl} alt={previewArticles[0].title} width={800} height={600} className="w-full h-[25rem] xl:min-w-[50%] rounded-lg object-cover object-center" />
 
             <div className="flex flex-col justify-between gap-y-6">
               <div className="flex flex-col gap-y-3">
@@ -36,7 +62,7 @@ export default function ArtikelHomepage(): JSX.Element {
               </div>
 
               <Link
-                href={`/akademik/artikel/${createSlug(previewArticles[0].title)}`}
+                href={`/akademik/artikel/${previewArticles[0].slug}`}
                 className="bg-primary-600 border border-primary-600 px-7 py-3 xl:px-10 xl:py-4 font-semibold text-white rounded-full hover:bg-white hover:text-primary-600 transition-colors duration-300 text-center lg:self-start"
               >
                 Baca artikel
@@ -50,13 +76,13 @@ export default function ArtikelHomepage(): JSX.Element {
           <div className="grid md:grid-cols-2 gap-8">
             {previewArticles.slice(1).map((artikel, index) => (
               <div key={index} className="flex flex-col gap-y-4">
-                <Image src={artikel.images[0]} alt={artikel.title} width={600} height={400} className="w-full h-[15rem] rounded-lg object-cover object-center" />
+                <img src={artikel.imageUrl} alt={artikel.title} width={600} height={400} className="w-full h-[15rem] rounded-lg object-cover object-center" />
                 <div className="flex flex-col gap-y-2">
                   <h3 className="font-medium">{artikel.date}</h3>
                   <h2 className="text-xl uppercase font-bold">{artikel.title}</h2>
                   <p className="text-justify leading-6">{artikel.content.slice(0, 400)}...</p>
                   <Link
-                    href={`/akademik/artikel/${createSlug(artikel.title)}`}
+                    href={`/akademik/artikel/${artikel.slug}`}
                     className="bg-primary-600 border border-primary-600 px-7 py-3 xl:px-10 xl:py-4 font-semibold text-white rounded-full hover:bg-white hover:text-primary-600 transition-colors duration-300 text-center self-start mt-2"
                   >
                     Baca artikel
